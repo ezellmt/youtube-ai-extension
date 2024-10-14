@@ -29,7 +29,7 @@ export default function OpenAISetup({}: OpenAISetupProps) {
           placeholder="Enter your OpenAI API key"
         />
         <div className="flex justify-center items-center w-full p-3 bg-white dark:bg-[#0f0f0f]">
-          <Button variant="outline" className="w-full h-12" onClick={onClick}>
+          <Button className="w-full h-12 border border-input bg-background hover:bg-accent hover:text-accent-foreground" onClick={onClick}>
             <span className="text-sm">Save API Key</span>
           </Button>
         </div>
