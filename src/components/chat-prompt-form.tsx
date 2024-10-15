@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button"
-import { TooltipWrapper } from "@/components/ui/tooltip-wrapper"
+import { Button } from "~src/components/ui/button"
+import { TooltipWrapper } from "~src/components/ui/tooltip-wrapper"
 import { useChat } from "@/contexts/chat-context"
 import { useExtension } from "@/contexts/extension-context"
 import { openAIKeyAtom } from "@/lib/atoms/openai"

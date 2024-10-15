@@ -1,5 +1,5 @@
-import Markdown from "@/components/markdown"
-import { Button } from "@/components/ui/button"
+import Markdown from "~src/components/markdown"
+import { Button } from "~src/components/ui/button"
 import { useSummary } from "@/contexts/summary-context"
 
 import SummarySkeleton from "./summary-skeleton"

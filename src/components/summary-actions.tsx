@@ -1,5 +1,5 @@
 // prettier-ignore
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~src/components/ui/select";
 
 import { useSummary } from "@/contexts/summary-context"
 import { models, prompts, type Model, type Prompt } from "@/lib/constants"

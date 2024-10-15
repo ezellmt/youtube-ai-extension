@@ -1,4 +1,4 @@
-import TranscriptItem from "@/components/transcript-item"
+import TranscriptItem from "~src/components/transcript-item"
 import { memo, useMemo } from "react"
 
 type Transcript = {

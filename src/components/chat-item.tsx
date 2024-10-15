@@ -1,4 +1,4 @@
-import { IconOpenAI, IconUser } from "@/components/ui/icons"
+import { IconOpenAI, IconUser } from "~src/components/ui/icons"
 import type { Message } from "@/lib/constants"
 
 import Markdown from "./markdown"

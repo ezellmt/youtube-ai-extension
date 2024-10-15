@@ -1,10 +1,10 @@
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import ExternalLink from "@/components/external-link"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { IconSparkles } from "@/components/ui/icons"
+import { Button } from "~src/components/ui/button"
+import { Input } from "~src/components/ui/input"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "~src/components/ui/card"
+import ExternalLink from "~src/components/external-link"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~src/components/ui/select"
+import { IconSparkles } from "~src/components/ui/icons"
 
 function IndexOptions() {
   const [ageRange, setAgeRange] = useState("13+")

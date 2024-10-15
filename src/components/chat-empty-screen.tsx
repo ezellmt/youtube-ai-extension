@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button"
-import { IconSparkles } from "@/components/ui/icons"
+import { Button } from "~src/components/ui/button"
+import { IconSparkles } from "~src/components/ui/icons"
 import { useChat } from "@/contexts/chat-context"
 import { useExtension } from "@/contexts/extension-context"
 import { cn } from "@/lib/utils"

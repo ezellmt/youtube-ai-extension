@@ -1,8 +1,7 @@
-import ExtensionActions from "@/components/extension-actions"
-import ExtensionPanels from "@/components/extension-panels"
-import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible"
+import ExtensionActions from "~src/components/extension-actions"
+import ExtensionPanels from "~src/components/extension-panels"
+import { Collapsible, CollapsibleContent } from "~src/components/ui/collapsible"
 import { useExtension } from "@/contexts/extension-context"
-import { useLocalStorage } from "@/lib/hooks/use-local-storage"
 import { getVideoData } from "@/utils/functions"
 import React from "react"
 

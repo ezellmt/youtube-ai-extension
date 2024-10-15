@@ -1,4 +1,4 @@
-import { IconOpenAI } from "@/components/ui/icons";
+import { IconOpenAI } from "~src/components/ui/icons";
 
 export type Prompt = {
   value: string;

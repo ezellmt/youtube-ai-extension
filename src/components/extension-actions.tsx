@@ -1,12 +1,12 @@
-import { Button } from "@/components/ui/button"
-import { CollapsibleTrigger } from "@/components/ui/collapsible"
-import { TooltipWrapper } from "@/components/ui/tooltip-wrapper"
+import { Button } from "~src/components/ui/button"
+import { CollapsibleTrigger } from "~src/components/ui/collapsible"
+import { TooltipWrapper } from "~src/components/ui/tooltip-wrapper"
 import { useCopyToClipboard } from "@/lib/hooks/use-copy-to-clipboard"
 
 // prettier-ignore
 import { ActivityLogIcon, CaretSortIcon, ChatBubbleIcon, CheckIcon, Link2Icon, Pencil2Icon } from "@radix-ui/react-icons";
 
-import { IconOpenAI } from "@/components/ui/icons"
+import { IconOpenAI } from "~src/components/ui/icons"
 import { useExtension } from "@/contexts/extension-context"
 
 interface ExtensionActionsProps {}

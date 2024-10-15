@@ -2,10 +2,10 @@ import { models, prompts, type Model, type Prompt } from "@/lib/constants"
 import { useState } from "react"
 
 // prettier-ignore
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~src/components/ui/select";
 
-import { Button } from "@/components/ui/button"
-import { TooltipWrapper } from "@/components/ui/tooltip-wrapper"
+import { Button } from "~src/components/ui/button"
+import { TooltipWrapper } from "~src/components/ui/tooltip-wrapper"
 import { useChat } from "@/contexts/chat-context"
 import { useExtension } from "@/contexts/extension-context"
 import { useCopyToClipboard } from "@/lib/hooks/use-copy-to-clipboard"

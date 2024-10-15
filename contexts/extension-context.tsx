@@ -1,5 +1,3 @@
-import { supabase } from "@/lib/supabase"
-import type { Provider, User } from "@supabase/supabase-js"
 import * as React from "react"
 
 // user auth

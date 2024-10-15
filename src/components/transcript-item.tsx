@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button"
-import { TooltipWrapper } from "@/components/ui/tooltip-wrapper"
+import { Button } from "~src/components/ui/button"
+import { TooltipWrapper } from "~src/components/ui/tooltip-wrapper"
 import { useCopyToClipboard } from "@/lib/hooks/use-copy-to-clipboard"
 import { CheckIcon, ClipboardCopyIcon, ClockIcon } from "@radix-ui/react-icons"
 import { memo } from "react"

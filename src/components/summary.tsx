@@ -1,5 +1,5 @@
-import SummaryActions from "@/components//summary-actions"
-import SummaryContent from "@/components/summary-content"
+import SummaryActions from "~src/components/summary-actions"
+import SummaryContent from "~src/components/summary-content"
 
 interface SummaryProps {}
 
