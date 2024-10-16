@@ -3,11 +3,15 @@
   "exclude": ["node_modules"],
   "include": [".plasmo/index.d.ts", "./**/*.ts", "./**/*.tsx"],
   "compilerOptions": {
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
     "paths": {
       "~*": ["./*"],
+      "~src/*": ["./src/*"],
       "@/*": ["./*"]
     },
     "baseUrl": ".",
-    "types": ["plasmo"]
+    "types": ["plasmo", "chrome"]
   }
 }

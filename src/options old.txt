@@ -1,0 +1,101 @@
+import { useState, useEffect } from "react"
+import { Button } from "~src/components/ui/button"
+import { Input } from "~src/components/ui/input"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "~src/components/ui/card"
+import ExternalLink from "~src/components/external-link"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~src/components/ui/select"
+import { IconSparkles } from "~src/components/ui/icons"
+import { supabaseManual as supabase } from "~src/core/supabase"
+
+function IndexOptions() {
+  const [user, setUser] = useState(null)
+  const [ageRange, setAgeRange] = useState("13+")
+  const [flaggedWords, setFlaggedWords] = useState("")
+
+  useEffect(() => {
+    const init = async () => {
+      const { data, error } = await supabase.auth.getSession()
+      if (error) {
+        console.error(error)
+        return
+      }
+      if (data.session) {
+        setUser(data.session.user)
+      }
+    }
+    init()
+  }, [])
+
+  const handleOAuthLogin = async (provider) => {
+    await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: location.href
+      }
+    })
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-zinc-900 text-zinc-50">
+      <Card className="w-full max-w-md border-zinc-800 bg-zinc-950">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-center space-x-1">
+            <span className="text-2xl font-bold">YouTube</span>
+            <IconSparkles className="w-6 h-6" />
+            <span className="text-2xl font-bold">AI</span>
+          </CardTitle>
+          <CardDescription>Configure your extension settings here.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-zinc-200">Login with:</h3>
+            <div className="space-y-2">
+              <Button variant="outline" className="w-full justify-start" onClick={() => handleOAuthLogin("google")}>
+                Google
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => handleOAuthLogin("github")}>
+                GitHub
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => handleOAuthLogin("x")}>
+                X
+              </Button>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-zinc-200">Set Age Range:</label>
+            <Select value={ageRange} onValueChange={setAgeRange}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select age range" />
+              </SelectTrigger>
+              <SelectContent>
+                {["4+", "7+", "10+", "13+", "17+"].map((age) => (
+                  <SelectItem key={age} value={age}>{age}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-zinc-200">Flagged Words:</label>
+            <Input
+              value={flaggedWords}
+              onChange={(e) => setFlaggedWords(e.target.value)}
+              className="bg-zinc-900 border-zinc-700 text-zinc-50 placeholder-zinc-400"
+              placeholder="Enter flagged words"
+            />
+          </div>
+          <Button className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-50">
+            Save Settings
+          </Button>
+        </CardContent>
+        <CardFooter className="flex justify-between">
+          <ExternalLink href="https://github.com/yourusername/youtube-ai-extension" className="text-zinc-400 hover:text-zinc-300">
+            Learn More
+          </ExternalLink>
+          <span className="text-sm text-zinc-400">Crafted with ❤️ by Your Name</span>
+        </CardFooter>
+      </Card>
+    </div>
+  )
+}
+
+export default IndexOptions
