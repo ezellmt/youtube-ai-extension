@@ -1,5 +1,3 @@
-// src/background/index.ts
-
 import { handleSignInWithGoogle, handleGetSession } from "./supabasebg";
 import { getSubscriptionStatus } from "~src/core/stripe";
 import { supabase } from "~src/core/supabase";

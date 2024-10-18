@@ -2,13 +2,13 @@
 
 const API_BASE_URL = 'https://youtube-parental-control.vercel.app/api';
 
-export async function createOrRetrieveStripeCustomer(userId: string, planName: string) {
+export async function createOrRetrieveStripeCustomer(userId: string) {
   const response = await fetch(`${API_BASE_URL}/create-stripe-customer`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ userId, planName }),
+    body: JSON.stringify({ userId }),
   });
 
   if (!response.ok) {
@@ -41,10 +41,33 @@ export async function getSubscriptionStatus(userId: string) {
     throw new Error('Failed to get subscription status');
   }
 
-  return response.json();
+  const data = await response.json();
+  return {
+    status: data.status,
+    planId: data.planId,
+    currentPeriodEnd: data.currentPeriodEnd,
+    videosAnalyzed: data.videosAnalyzed,
+    videoLimit: data.videoLimit
+  };
 }
 
 export async function redirectToCheckout(clientSecret: string) {
   const checkoutUrl = `https://youtube-parental-control.vercel.app/checkout?client_secret=${clientSecret}`;
   chrome.tabs.create({ url: checkoutUrl });
+}
+
+export async function incrementVideosAnalyzed(userId: string) {
+  const response = await fetch(`${API_BASE_URL}/increment-videos-analyzed`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ userId }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to increment videos analyzed');
+  }
+
+  return response.json();
 }

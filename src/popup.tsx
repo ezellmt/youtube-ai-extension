@@ -1,5 +1,3 @@
-// src/popup.tsx
-
 import "@/src/style.css"
 import { useState, useEffect } from "react"
 import { Button } from "~src/components/ui/button"
@@ -17,7 +15,10 @@ interface AuthResult {
 
 interface SubscriptionStatus {
   status: string;
-  // Add other relevant fields
+  planId: string;
+  currentPeriodEnd: number;
+  videosAnalyzed: number;
+  videoLimit: number;
 }
 
 function IndexPopup() {
@@ -34,6 +35,7 @@ function IndexPopup() {
         console.log("Sign-in result:", result);
         if (result && result.session && result.user) {
           setUser(result.user);
+          await createStripeCustomer(result.user.id);
           await checkSubscriptionStatus(result.user.id);
           toast({ description: `Signed in successfully as ${result.user.email}` });
         } else {
@@ -47,6 +49,7 @@ function IndexPopup() {
         const userData = await getCurrentUser();
         if (userData && userData.user) {
           setUser(userData.user);
+          await createStripeCustomer(userData.user.id);
           await checkSubscriptionStatus(userData.user.id);
           toast({ description: `Signed in successfully as ${userData.user.email}` })
         }
@@ -56,6 +59,22 @@ function IndexPopup() {
       toast({ description: `Error with ${provider} login: ${error instanceof Error ? error.message : String(error)}` })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const createStripeCustomer = async (userId: string) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_WEBSITE_URL}/api/create-stripe-customer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      });
+      if (!response.ok) throw new Error('Failed to create Stripe customer');
+      const data = await response.json();
+      console.log('Stripe customer created:', data);
+    } catch (error) {
+      console.error('Error creating Stripe customer:', error);
+      toast({ description: 'Error creating customer account' });
     }
   }
 
@@ -106,7 +125,7 @@ function IndexPopup() {
   const handleUpgrade = async () => {
     if (!user) return;
     try {
-      const { checkoutUrl } = await createStripeCheckoutSession(user.id, 'your_price_id_here');
+      const { checkoutUrl } = await createStripeCheckoutSession(user.id, 'price_1234567890'); // Replace with actual price ID
       await redirectToCheckout(checkoutUrl);
     } catch (error) {
       console.error('Error creating checkout session:', error);
@@ -125,6 +144,7 @@ function IndexPopup() {
           <p>User ID: {user.id}</p>
           <p>Email: {user.email}</p>
           <p>Subscription: {subscriptionStatus?.status || 'Loading...'}</p>
+          <p>Videos Analyzed: {subscriptionStatus?.videosAnalyzed || 0} / {subscriptionStatus?.videoLimit || 0}</p>
           <Button onClick={handleSignOut} className="mt-4 w-full">Sign Out</Button>
           {subscriptionStatus?.status !== 'active' && (
             <Button onClick={handleUpgrade} className="mt-4 w-full">Upgrade to Pro</Button>
