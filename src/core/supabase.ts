@@ -4,7 +4,14 @@ import { createClient, type User } from "@supabase/supabase-js";
 
 export const supabase = createClient(
   process.env.PLASMO_PUBLIC_SUPABASE_URL,
-  process.env.PLASMO_PUBLIC_SUPABASE_KEY
+  process.env.PLASMO_PUBLIC_SUPABASE_KEY,
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+    }
+  }
 );
 
 const chromeStorageKeys = {
@@ -81,4 +88,13 @@ export async function getCurrentUser(): Promise<null | {
     return { user: session.user, accessToken: session.access_token };
   }
   return null;
+}
+
+export function setupAuthStateChange() {
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      const redirectTo = `chrome-extension://${chrome.runtime.id}/options.html`;
+      chrome.tabs.create({ url: redirectTo });
+    }
+  });
 }

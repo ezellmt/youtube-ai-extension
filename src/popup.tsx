@@ -1,4 +1,5 @@
 import "@/src/style.css"
+import { API_BASE_URL } from "~/src/core/stripe"
 import { useState, useEffect } from "react"
 import { Button } from "~src/components/ui/button"
 import { Toaster } from "~src/components/ui/toaster"
@@ -64,7 +65,7 @@ function IndexPopup() {
 
   const createStripeCustomer = async (userId: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_WEBSITE_URL}/api/create-stripe-customer`, {
+      const response = await fetch(`${API_BASE_URL}/create-stripe-customer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId })
@@ -87,6 +88,7 @@ function IndexPopup() {
       toast({ description: "Error checking subscription status" });
     }
   }
+
 
   useEffect(() => {
     const checkSession = async () => {
@@ -125,8 +127,8 @@ function IndexPopup() {
   const handleUpgrade = async () => {
     if (!user) return;
     try {
-      const { checkoutUrl } = await createStripeCheckoutSession(user.id, 'price_1234567890'); // Replace with actual price ID
-      await redirectToCheckout(checkoutUrl);
+      const { sessionId, clientSecret } = await createStripeCheckoutSession(user.id, 'price_1234567890'); // Replace with actual price ID
+      await redirectToCheckout(clientSecret);
     } catch (error) {
       console.error('Error creating checkout session:', error);
       toast({ description: "Error creating checkout session" });

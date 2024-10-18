@@ -1,6 +1,10 @@
 import { handleSignInWithGoogle, handleGetSession } from "./supabasebg";
 import { getSubscriptionStatus } from "~src/core/stripe";
-import { supabase } from "~src/core/supabase";
+import { supabase, setupAuthStateChange } from "~src/core/supabase";
+
+
+// Set up auth state change listener
+setupAuthStateChange();
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   switch (request.action) {

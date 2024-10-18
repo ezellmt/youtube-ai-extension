@@ -1,6 +1,6 @@
 // src/core/stripe.ts
 
-const API_BASE_URL = 'https://youtube-parental-control.vercel.app/api';
+export const API_BASE_URL = 'https://youtube-parental-control.vercel.app/api';
 
 export async function createOrRetrieveStripeCustomer(userId: string) {
   const response = await fetch(`${API_BASE_URL}/create-stripe-customer`, {
@@ -28,7 +28,8 @@ export async function createStripeCheckoutSession(userId: string, priceId: strin
   });
 
   if (!response.ok) {
-    throw new Error('Failed to create payment intent');
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to create payment intent');
   }
 
   return response.json();
@@ -38,7 +39,8 @@ export async function getSubscriptionStatus(userId: string) {
   const response = await fetch(`${API_BASE_URL}/subscription-status?userId=${userId}`);
 
   if (!response.ok) {
-    throw new Error('Failed to get subscription status');
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to get subscription status');
   }
 
   const data = await response.json();
@@ -66,7 +68,8 @@ export async function incrementVideosAnalyzed(userId: string) {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to increment videos analyzed');
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to increment videos analyzed');
   }
 
   return response.json();
