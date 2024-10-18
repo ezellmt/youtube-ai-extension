@@ -1,3 +1,7 @@
+// src/background/index.ts
+
+import { handleSignInWithGoogle, handleGetSession } from "./supabasebg";
+import { getSubscriptionStatus } from "~src/core/stripe";
 import { supabase } from "~src/core/supabase";
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
@@ -8,52 +12,28 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     case "getsession":
       handleGetSession(sendResponse);
       return true;
+    case "checkSubscription":
+      checkSubscription(sendResponse);
+      return true;
     default:
       sendResponse({ error: "Unknown action" });
       return false;
   }
 });
-async function handleSignInWithGoogle(sendResponse) {
+
+async function checkSubscription(sendResponse) {
   try {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: chrome.identity.getRedirectURL()
-      }
-    });
-
-    if (error) throw error;
-
-    chrome.identity.launchWebAuthFlow({
-      url: data.url,
-      interactive: true
-    }, async (redirectUrl) => {
-      if (chrome.runtime.lastError) {
-        sendResponse({ error: chrome.runtime.lastError.message });
-      } else {
-        const { data, error } = await supabase.auth.getSession();
-        if (error) {
-          sendResponse({ error: error.message });
-        } else {
-          sendResponse({ data: data });
-        }
-      }
-    });
-  } catch (error) {
-    sendResponse({ error: error.message });
-  }
-}
-
-async function handleGetSession(sendResponse) {
-  try {
-    const { data, error } = await supabase.auth.getSession();
-    if (error) {
-      sendResponse({ error: error.message });
-    } else {
-      sendResponse({ data: data });
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData || !sessionData.session || !sessionData.session.user) {
+      sendResponse({ error: "User not authenticated" });
+      return;
     }
+
+    const userId = sessionData.session.user.id;
+    const subscriptionStatus = await getSubscriptionStatus(userId);
+
+    sendResponse({ data: subscriptionStatus });
   } catch (error) {
     sendResponse({ error: error.message });
   }
 }
-

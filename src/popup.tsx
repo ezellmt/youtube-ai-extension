@@ -1,19 +1,29 @@
+// src/popup.tsx
+
 import "@/src/style.css"
 import { useState, useEffect } from "react"
 import { Button } from "~src/components/ui/button"
 import { Toaster } from "~src/components/ui/toaster"
 import { useToast } from "~src/components/ui/use-toast"
 import { supabase, getCurrentUser, signInWithGoogle } from "~src/core/supabase"
+import { getSubscriptionStatus, createStripeCheckoutSession, redirectToCheckout } from "~src/core/stripe"
 import type { User, Session } from "@supabase/supabase-js"
+import { RainbowButton } from "~src/components/ui/rainbow-button"
 
 interface AuthResult {
   session: Session | null;
   user: User | null;
 }
 
+interface SubscriptionStatus {
+  status: string;
+  // Add other relevant fields
+}
+
 function IndexPopup() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(false)
+  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null)
   const { toast } = useToast()
 
   const handleOAuthLogin = async (provider: "github" | "google" | "twitter") => {
@@ -24,6 +34,7 @@ function IndexPopup() {
         console.log("Sign-in result:", result);
         if (result && result.session && result.user) {
           setUser(result.user);
+          await checkSubscriptionStatus(result.user.id);
           toast({ description: `Signed in successfully as ${result.user.email}` });
         } else {
           throw new Error("No session returned after sign-in");
@@ -34,8 +45,9 @@ function IndexPopup() {
           throw error;
         }
         const userData = await getCurrentUser();
-        if (userData) {
+        if (userData && userData.user) {
           setUser(userData.user);
+          await checkSubscriptionStatus(userData.user.id);
           toast({ description: `Signed in successfully as ${userData.user.email}` })
         }
       }
@@ -47,14 +59,24 @@ function IndexPopup() {
     }
   }
 
+  const checkSubscriptionStatus = async (userId: string) => {
+    try {
+      const status = await getSubscriptionStatus(userId);
+      setSubscriptionStatus(status);
+    } catch (error) {
+      console.error("Error checking subscription status:", error);
+      toast({ description: "Error checking subscription status" });
+    }
+  }
+
   useEffect(() => {
     const checkSession = async () => {
       setLoading(true)
       try {
         const userData = await getCurrentUser();
-        if (userData) {
+        if (userData && userData.user) {
           setUser(userData.user);
-          toast({ description: `Welcome back, ${userData.user.email}!` })
+          await checkSubscriptionStatus(userData.user.id);
         }
       } catch (error) {
         console.error("Error checking session:", error);
@@ -71,12 +93,24 @@ function IndexPopup() {
     try {
       await supabase.auth.signOut();
       setUser(null);
+      setSubscriptionStatus(null);
       toast({ description: "Signed out successfully" })
     } catch (error) {
       console.error("Error signing out:", error)
       toast({ description: `Error signing out: ${error instanceof Error ? error.message : String(error)}` })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleUpgrade = async () => {
+    if (!user) return;
+    try {
+      const { checkoutUrl } = await createStripeCheckoutSession(user.id, 'your_price_id_here');
+      await redirectToCheckout(checkoutUrl);
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      toast({ description: "Error creating checkout session" });
     }
   }
 
@@ -90,7 +124,11 @@ function IndexPopup() {
           <h1 className="text-xl font-bold mb-4">User Info</h1>
           <p>User ID: {user.id}</p>
           <p>Email: {user.email}</p>
-          <Button onClick={handleSignOut} className="mt-4">Sign Out</Button>
+          <p>Subscription: {subscriptionStatus?.status || 'Loading...'}</p>
+          <Button onClick={handleSignOut} className="mt-4 w-full">Sign Out</Button>
+          {subscriptionStatus?.status !== 'active' && (
+            <Button onClick={handleUpgrade} className="mt-4 w-full">Upgrade to Pro</Button>
+          )}
         </div>
       ) : (
         <div className="space-y-4">
@@ -100,6 +138,9 @@ function IndexPopup() {
             <Button onClick={() => handleOAuthLogin("google")} className="w-full">Sign in with Google</Button>
             <Button onClick={() => handleOAuthLogin("twitter")} className="w-full">Sign in with Twitter</Button>
           </div>
+          <RainbowButton onClick={() => console.log("Sign up clicked")} className="w-full text-lg">
+            Get Started for free
+          </RainbowButton>
         </div>
       )}
     </div>

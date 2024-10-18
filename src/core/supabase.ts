@@ -1,3 +1,5 @@
+// src/core/supabase.ts
+
 import { createClient, type User } from "@supabase/supabase-js";
 
 export const supabase = createClient(
@@ -52,7 +54,6 @@ export async function signInWithGoogle() {
             const { data, error } = await supabase.auth.setSession({
               access_token,
               refresh_token,
-              expires_in: parseInt(expires_in || '3600')
             });
             if (error) {
               reject(error);
