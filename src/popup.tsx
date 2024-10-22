@@ -1,3 +1,4 @@
+// Browser extension codebase src/popup.tsx
 import "@/src/style.css"
 import { API_BASE_URL } from "~/src/core/stripe"
 import { useState, useEffect } from "react"
@@ -5,7 +6,7 @@ import { Button } from "~src/components/ui/button"
 import { Toaster } from "~src/components/ui/toaster"
 import { useToast } from "~src/components/ui/use-toast"
 import { supabase, getCurrentUser, signInWithGoogle } from "~src/core/supabase"
-import { getSubscriptionStatus, createStripeCheckoutSession, redirectToCheckout } from "~src/core/stripe"
+import { getSubscriptionStatus, getOrCreateStripeCustomer, createStripeCheckoutSession, redirectToCheckout } from "~src/core/stripe"
 import type { User, Session } from "@supabase/supabase-js"
 import { RainbowButton } from "~src/components/ui/rainbow-button"
 
@@ -29,66 +30,69 @@ function IndexPopup() {
   const { toast } = useToast()
 
   const handleOAuthLogin = async (provider: "github" | "google" | "twitter") => {
-    setLoading(true)
+    setLoading(true);
     try {
+      let result: AuthResult | null = null;
       if (provider === "google") {
-        const result = await signInWithGoogle() as AuthResult;
+        result = await signInWithGoogle() as AuthResult;
         console.log("Sign-in result:", result);
-        if (result && result.session && result.user) {
-          setUser(result.user);
-          await createStripeCustomer(result.user.id);
-          await checkSubscriptionStatus(result.user.id);
-          toast({ description: `Signed in successfully as ${result.user.email}` });
-        } else {
-          throw new Error("No session returned after sign-in");
-        }
       } else {
-        const { error } = await supabase.auth.signInWithOAuth({ provider })
+        const { error } = await supabase.auth.signInWithOAuth({ provider });
         if (error) {
           throw error;
         }
         const userData = await getCurrentUser();
         if (userData && userData.user) {
-          setUser(userData.user);
-          await createStripeCustomer(userData.user.id);
-          await checkSubscriptionStatus(userData.user.id);
-          toast({ description: `Signed in successfully as ${userData.user.email}` })
+          result = { session: null, user: userData.user };
         }
+      }
+
+      if (result && result.user) {
+        setUser(result.user);
+        
+        // Use getOrCreateStripeCustomer instead of createStripeCustomer
+        const customerData = await getOrCreateStripeCustomer(result.user.id, result.user.email || '');
+        console.log("Stripe customer data:", customerData);
+
+        await checkSubscriptionStatus(result.user.id);
+        toast({ description: `Signed in successfully as ${result.user.email}` });
+      } else {
+        throw new Error("No user returned after sign-in");
       }
     } catch (error) {
       console.error(`Error with ${provider} login: `, error);
-      toast({ description: `Error with ${provider} login: ${error instanceof Error ? error.message : String(error)}` })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const createStripeCustomer = async (userId: string) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/create-stripe-customer`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId })
+      toast({ 
+        variant: "destructive",
+        description: error instanceof Error ? error.message : `Error with ${provider} login`
       });
-      if (!response.ok) throw new Error('Failed to create Stripe customer');
-      const data = await response.json();
-      console.log('Stripe customer created:', data);
-    } catch (error) {
-      console.error('Error creating Stripe customer:', error);
-      toast({ description: 'Error creating customer account' });
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   const checkSubscriptionStatus = async (userId: string) => {
+    console.log(`Checking subscription status for user: ${userId}`);
     try {
+      console.log('Calling getSubscriptionStatus...');
       const status = await getSubscriptionStatus(userId);
+      console.log('Received subscription status:', status);
       setSubscriptionStatus(status);
     } catch (error) {
       console.error("Error checking subscription status:", error);
-      toast({ description: "Error checking subscription status" });
+      console.error("Error stack:", error instanceof Error ? error.stack : 'No stack available');
+      setSubscriptionStatus({
+        status: 'error',
+        planId: '',
+        currentPeriodEnd: 0,
+        videosAnalyzed: 0,
+        videoLimit: 0
+      });
+      toast({
+        variant: "destructive",
+        description: error instanceof Error ? error.message : "Failed to check subscription status. Please try again later."
+      });
     }
   }
-
 
   useEffect(() => {
     const checkSession = async () => {
@@ -105,7 +109,6 @@ function IndexPopup() {
         setLoading(false)
       }
     };
-
     checkSession();
   }, [])
 
@@ -127,13 +130,16 @@ function IndexPopup() {
   const handleUpgrade = async () => {
     if (!user) return;
     try {
-      const { sessionId, clientSecret } = await createStripeCheckoutSession(user.id, 'price_1234567890'); // Replace with actual price ID
-      await redirectToCheckout(clientSecret);
+      const { url } = await createStripeCheckoutSession(user.id, 'price_1PwUk82KPkR5LIBQ16hmUgHc');
+      chrome.tabs.create({ url });
     } catch (error) {
       console.error('Error creating checkout session:', error);
       toast({ description: "Error creating checkout session" });
     }
   }
+
+  // Always show the upgrade button for testing
+  const showUpgradeButton = true;
 
   return (
     <div className="w-80 p-4 bg-zinc-900 text-zinc-50">
@@ -146,9 +152,10 @@ function IndexPopup() {
           <p>User ID: {user.id}</p>
           <p>Email: {user.email}</p>
           <p>Subscription: {subscriptionStatus?.status || 'Loading...'}</p>
+          <p>Plan ID: {subscriptionStatus?.planId || 'N/A'}</p>
           <p>Videos Analyzed: {subscriptionStatus?.videosAnalyzed || 0} / {subscriptionStatus?.videoLimit || 0}</p>
           <Button onClick={handleSignOut} className="mt-4 w-full">Sign Out</Button>
-          {subscriptionStatus?.status !== 'active' && (
+          {showUpgradeButton && (
             <Button onClick={handleUpgrade} className="mt-4 w-full">Upgrade to Pro</Button>
           )}
         </div>

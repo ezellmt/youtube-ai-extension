@@ -1,3 +1,5 @@
+//
+
 import { handleSignInWithGoogle, handleGetSession } from "./supabasebg";
 import { getSubscriptionStatus } from "~src/core/stripe";
 import { supabase, setupAuthStateChange } from "~src/core/supabase";

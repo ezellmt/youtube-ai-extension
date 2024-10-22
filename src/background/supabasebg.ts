@@ -1,4 +1,4 @@
-// src/background/supabasebg.ts
+// 
 
 import { supabase } from "~src/core/supabase";
 

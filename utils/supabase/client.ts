@@ -1,3 +1,5 @@
+// Browser extension codebase utils/supabase/client.ts
+
 import { supabase } from "~/src/core/supabase"
 
 export function setupAuthStateChange() {

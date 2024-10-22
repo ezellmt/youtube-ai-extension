@@ -1,4 +1,4 @@
-// src/contents/plasmo-main-ui.tsx
+//
 
 import Extension from "~src/components/extension"
 import Providers from "~src/components/providers"

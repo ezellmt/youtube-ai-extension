@@ -1,3 +1,5 @@
+// Browser extension codebase src/options.tsx
+
 import { useEffect } from "react"
 import { supabase } from "~src/core/supabase"
 
